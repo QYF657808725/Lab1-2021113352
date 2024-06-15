@@ -1,4 +1,5 @@
 package org.example;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -13,9 +14,21 @@ import java.util.Set;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Collection;
+
+/**
+ * Main class for the application.
+ */
 public class Main {
+    /**
+     * 表示图中单词之间的有向边.
+     * 键是单词。值是该单词可以指向的单词集合.
+     */
     private static Map<String, Set<String>> graph;
 
+    /**
+     * 存储每个单词出现的频率.
+     * 键是单词，值是该单词出现的次数.
+     */
     private static Map<String, Integer> wordFrequency;
 
     private static Map<String, Map<String, Integer>> edgeWeights;

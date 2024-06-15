@@ -1,0 +1,743 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=GBK"> 
+  <title>Coverage Report > Main</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.example</a>
+</div>
+
+<h1>Coverage Summary for Class: Main (org.example)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Main</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    28.6%
+  </span>
+  <span class="absValue">
+    (4/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14.1%
+  </span>
+  <span class="absValue">
+    (39/277)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.example;
+&nbsp;
+&nbsp;import java.io.BufferedReader;
+&nbsp;import java.io.FileReader;
+&nbsp;import java.io.FileWriter;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.PrintWriter;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Random;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.Scanner;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * Main class for the application.
+&nbsp; */
+<b class="nc">&nbsp;public class Main {</b>
+&nbsp;    /**
+&nbsp;     * 表示图中单词之间的有向边.
+&nbsp;     * 键是单词。值是该单词可以指向的单词集合.
+&nbsp;     */
+&nbsp;    private static Map&lt;String, Set&lt;String&gt;&gt; graph;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 存储每个单词出现的频率.
+&nbsp;     * 键是单词，值是该单词出现的次数.
+&nbsp;     */
+&nbsp;    private static Map&lt;String, Integer&gt; wordFrequency;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 存储图中每条边的权重.
+&nbsp;     * 键是起始单词，值是另一个映射，其键是目的单词，值是边的权重.
+&nbsp;     */
+&nbsp;    private static Map&lt;String, Map&lt;String, Integer&gt;&gt; edgeWeights;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 一个用于随机游走的Random实例.
+&nbsp;     * 被声明为final以确保在多线程环境下的安全性.
+&nbsp;     */
+<b class="fc">&nbsp;    private static final Random random = new Random();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 表示图中顶点的最大数量.
+&nbsp;     * 用于初始化距离矩阵的大小.
+&nbsp;     */
+&nbsp;    private static int V;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 存储顶点对之间的最短路径长度.
+&nbsp;     * 二维数组，其中dist[i][j]表示从顶点i到顶点j的最短路径长度.
+&nbsp;     */
+<b class="fc">&nbsp;    private static volatile boolean stopRandomWalk = false;</b>
+&nbsp;    private static int[][] dist;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 程序的主入口点，初始化数据结构，读取文件，并提供用户交互菜单.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * 方法首先创建所需的数据结构，包括图、单词频率和边权重。
+&nbsp;     * 然后，它读取并处理一个文本文件来构建图。
+&nbsp;     * 最后，它进入一个循环，提供用户一个菜单，用户可以从中选择不同的操作，
+&nbsp;     * 如显示有向图、查询桥接词、生成新文本、计算最短路径、执行随机游走或退出程序。
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param args 命令行参数，当前未使用。
+&nbsp;     */
+&nbsp;    public static void main(final String[] args) {
+&nbsp;        // 初始化数据结构
+<b class="nc">&nbsp;        graph = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        wordFrequency = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        edgeWeights = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;
+&nbsp;        // 读取文本文件并构建图
+<b class="nc">&nbsp;        readTextFileAndBuildGraph(&quot;C:\\Users\\lc\\Desktop\\Lab1-main\\Lab1-main\\Lab1-main\\test\\test1.txt&quot;,graph,</b>
+&nbsp;                wordFrequency, edgeWeights);
+&nbsp;
+<b class="nc">&nbsp;        Scanner scanner = new Scanner(System.in);</b>
+&nbsp;//        int[] arr = {1,2,3,4,5,6};
+&nbsp;//        Arrays.fill(arr,9,10,8);
+&nbsp;        char choice;
+&nbsp;
+&nbsp;        do {
+<b class="nc">&nbsp;            System.out.println(&quot;\n--- Main Menu ---&quot;);</b>
+<b class="nc">&nbsp;            System.out.println(&quot;1. Show Directed Graph&quot;);</b>
+<b class="nc">&nbsp;            System.out.println(&quot;2. Query Bridge Words&quot;);</b>
+<b class="nc">&nbsp;            System.out.println(&quot;3. Generate New Text&quot;);</b>
+<b class="nc">&nbsp;            System.out.println(&quot;4. Calculate Shortest Path&quot;);</b>
+<b class="nc">&nbsp;            System.out.println(&quot;5. Perform Random Walk&quot;);</b>
+<b class="nc">&nbsp;            System.out.println(&quot;6. Exit&quot;);</b>
+<b class="nc">&nbsp;            System.out.print(&quot;Enter your choice (1-6): &quot;);</b>
+<b class="nc">&nbsp;            choice = scanner.next().charAt(0);</b>
+<b class="nc">&nbsp;            scanner.nextLine(); // Consume newline</b>
+&nbsp;
+<b class="nc">&nbsp;            switch (choice) {</b>
+&nbsp;                case &#39;1&#39; -&gt; {
+<b class="nc">&nbsp;                    System.out.println(&quot;\nGraph built. Displaying directed graph...&quot;);</b>
+<b class="nc">&nbsp;                    showDirectedGraph();</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;                case &#39;2&#39; -&gt; {
+<b class="nc">&nbsp;                    System.out.print(&quot;Enter word 1: &quot;);</b>
+<b class="nc">&nbsp;                    String word1 = scanner.nextLine();</b>
+<b class="nc">&nbsp;                    System.out.print(&quot;Enter word 2: &quot;);</b>
+<b class="nc">&nbsp;                    String word2 = scanner.nextLine();</b>
+<b class="nc">&nbsp;                    System.out.println(&quot;Bridge words from &#39;&quot; + word1 + &quot;&#39; to &#39;&quot;</b>
+<b class="nc">&nbsp;                            + word2 + &quot;&#39;: &quot; + queryBridgeWords(graph, word1, word2));</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;                case &#39;3&#39; -&gt; {
+<b class="nc">&nbsp;                    System.out.println(</b>
+&nbsp;                            &quot;Enter a line of text to generate new text:&quot;);
+<b class="nc">&nbsp;                    String inputText = scanner.nextLine();</b>
+<b class="nc">&nbsp;                    System.out.println(&quot;Generated new text: &quot;</b>
+<b class="nc">&nbsp;                            + generateNewText(inputText));</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;                case &#39;4&#39; -&gt; {
+<b class="nc">&nbsp;                    System.out.print(&quot;Enter word 1: &quot;);</b>
+<b class="nc">&nbsp;                    String wordA = scanner.nextLine();</b>
+<b class="nc">&nbsp;                    System.out.print(&quot;Enter word 2: &quot;);</b>
+<b class="nc">&nbsp;                    String wordB = scanner.nextLine();</b>
+<b class="nc">&nbsp;                    showDirectedGraphWithShortestPath(wordA, wordB);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;                case &#39;5&#39; -&gt; {
+<b class="nc">&nbsp;                    System.out.println(</b>
+&nbsp;                            &quot;\nPerforming a random walk... Press &#39;s&#39; to stop.&quot;);
+<b class="nc">&nbsp;                    stopRandomWalk = false; // 重置停止标志</b>
+&nbsp;                    // 使用线程执行随机游走
+<b class="nc">&nbsp;                    Thread randomWalkThread = new Thread(Main::randomWalk);</b>
+<b class="nc">&nbsp;                    randomWalkThread.start();</b>
+&nbsp;
+&nbsp;                    // 等待用户输入以停止游走或返回主菜单
+<b class="nc">&nbsp;                    while (!stopRandomWalk) {</b>
+<b class="nc">&nbsp;                        System.out.print(</b>
+&nbsp;                                &quot;Enter &#39;s&#39; to stop the random walk&quot;
+&nbsp;                                        +
+&nbsp;                                        &quot;or just press enter to continue: \n&quot;);
+<b class="nc">&nbsp;                        String input = scanner.nextLine().trim().toLowerCase();</b>
+<b class="nc">&nbsp;                        if (&quot;s&quot;.equals(input)) {</b>
+<b class="nc">&nbsp;                            stopRandomWalk = true; // 用户请求停止随机游走</b>
+<b class="nc">&nbsp;                            break;</b>
+&nbsp;                        }
+<b class="nc">&nbsp;                    }</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                case &#39;6&#39; -&gt; System.out.println(&quot;Exiting program.&quot;);</b>
+<b class="nc">&nbsp;                default -&gt; System.out.println(&quot;Invalid choice. &quot;</b>
+&nbsp;                        +
+&nbsp;                        &quot;Please enter a number between 1 and 6.&quot;);
+&nbsp;            }
+<b class="nc">&nbsp;        } while (choice != &#39;6&#39;);</b>
+&nbsp;
+<b class="nc">&nbsp;        scanner.close();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 从指定的文本文件中读取内容，并构建图和单词频率映射.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * 该方法使用BufferedReader按行读取文件，并将每一行中的文本转换为小写，
+&nbsp;     * 同时将所有非字母字符替换为空白。然后，它将每一行分割成单词，
+&nbsp;     * 并将每对连续的单词视为图中的一个有向边。单词频率映射记录每个单词出现的频率，
+&nbsp;     * 而边权重映射记录每个单词对之间边的权重。
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param filePath 要读取的文本文件的路径。
+&nbsp;     * @throws IOException 如果读取文件时发生I/O错误。
+&nbsp;     */
+&nbsp;    public static void readTextFileAndBuildGraph(final String filePath,
+&nbsp;                                                 Map&lt;String, Set&lt;String&gt;&gt; graph,
+&nbsp;                                                 Map&lt;String, Integer&gt; wordFrequency,
+&nbsp;                                                 Map&lt;String, Map&lt;String, Integer&gt;&gt; edgeWeights) {
+<b class="fc">&nbsp;        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {</b>
+&nbsp;
+&nbsp;            String line;
+<b class="fc">&nbsp;            while ((line = br.readLine()) != null) {</b>
+&nbsp;                // 转换为小写，并将非字母字符替换为空格
+<b class="fc">&nbsp;                line = line.toLowerCase().replaceAll(&quot;[^a-z ]&quot;, &quot; &quot;);</b>
+&nbsp;
+&nbsp;                // 分割单词
+<b class="fc">&nbsp;                String[] words = line.split(&quot;\\s+&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;                for (int i = 0; i &lt; words.length - 1; i++) {</b>
+<b class="fc">&nbsp;                    String currentWord = words[i];</b>
+<b class="fc">&nbsp;                    String nextWord = words[i + 1];</b>
+&nbsp;
+&nbsp;                    // 更新单词频率
+<b class="fc">&nbsp;                    wordFrequency.put(currentWord, wordFrequency.getOrDefault(currentWord, 0) + 1);</b>
+&nbsp;
+&nbsp;                    // 添加边
+<b class="fc">&nbsp;                    graph.computeIfAbsent(currentWord, k -&gt; new HashSet&lt;&gt;()).add(nextWord);</b>
+&nbsp;
+&nbsp;                    // 更新权重
+<b class="fc">&nbsp;                    updateWeight(edgeWeights, currentWord, nextWord);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            V = graph.size();</b>
+<b class="fc">&nbsp;            dist = new int[V][V]; // 确保这部分在图构建完成后进行初始化</b>
+&nbsp;
+&nbsp;
+<b class="fc">&nbsp;        }catch (IOException e) {</b>
+<b class="nc">&nbsp;        e.printStackTrace();</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 重载 updateWeight 方法以接受 edgeWeights 映射作为参数
+&nbsp;    private static void updateWeight(Map&lt;String, Map&lt;String, Integer&gt;&gt; edgeWeights, final String from, final String to) {
+&nbsp;        // 获取从from到to的现有权重，如果没有设置，则默认为0
+<b class="fc">&nbsp;        int currentWeight = edgeWeights.getOrDefault(from, new HashMap&lt;&gt;()).getOrDefault(to, 0);</b>
+&nbsp;
+&nbsp;        // 权重加1，因为每次调用此方法意味着 from 和 to 又相邻出现了一次
+<b class="fc">&nbsp;        currentWeight += 1;</b>
+&nbsp;
+&nbsp;        // 更新边的权重
+<b class="fc">&nbsp;        edgeWeights.computeIfAbsent(from, k -&gt; new HashMap&lt;&gt;()).put(to, currentWeight);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 显示有向图的可视化.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * 该方法首先创建一个DOT文件，该文件定义了图的结构和节点/边的属性。
+&nbsp;     * 然后，它使用Graphviz软件的命令行工具将DOT文件转换为图形表示，
+&nbsp;     * 通常是一个PNG图像文件。
+&nbsp;     * &lt;/p&gt;
+&nbsp;     * &lt;p&gt;
+&nbsp;     * 节点表示单词，边表示单词之间的转移，边的权重表示转移发生的频率。
+&nbsp;     * 生成的图像文件将保存在用户的目录下。
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see #escapeDotString(String)
+&nbsp;     * @see #graph
+&nbsp;     * @see #edgeWeights
+&nbsp;     */
+&nbsp;    public static void showDirectedGraph() {
+&nbsp;        // DOT 文件将被创建在用户目录下
+<b class="nc">&nbsp;        String dotFilePath = &quot;graph.dot&quot;;</b>
+<b class="nc">&nbsp;        String graphvizPath = &quot;D:\\Graphviz-11.0.0-win64\\Graphviz\\bin\\dot.exe&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        String pngFilePath = &quot;C:\\Users\\lc\\Desktop\\Lab1-main\\Lab1-main\\Lab1-main\\graph.png&quot;;</b>
+&nbsp;
+&nbsp;        // 创建DOT文件
+<b class="nc">&nbsp;        try (PrintWriter out = new PrintWriter(new FileWriter(dotFilePath))) {</b>
+<b class="nc">&nbsp;            out.println(&quot;digraph G {&quot;);</b>
+<b class="nc">&nbsp;            out.println(&quot;  rankdir=LR;&quot;); // 设置图的方向从左到右</b>
+&nbsp;
+&nbsp;            // 添加节点
+<b class="nc">&nbsp;            for (String node : graph.keySet()) {</b>
+<b class="nc">&nbsp;                out.println(</b>
+<b class="nc">&nbsp;                        &quot;  \&quot;&quot; + escapeDotString(node) + &quot;\&quot; [shape=circle];&quot;);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // 添加边和权重
+<b class="nc">&nbsp;            for (Map.Entry&lt;String, Set&lt;String&gt;&gt; entry : graph.entrySet()) {</b>
+<b class="nc">&nbsp;                String fromNode = entry.getKey();</b>
+<b class="nc">&nbsp;                for (String toNode : entry.getValue()) {</b>
+&nbsp;                    // 获取边的权重
+<b class="nc">&nbsp;                    int weight = edgeWeights.getOrDefault(</b>
+<b class="nc">&nbsp;                            fromNode, new HashMap&lt;&gt;()).getOrDefault(toNode, 0);</b>
+&nbsp;                    // 将权重作为标签添加到边
+<b class="nc">&nbsp;                    out.printf(</b>
+&nbsp;                            &quot;  \&quot;%s\&quot; -&gt; \&quot;%s\&quot; [label=\&quot;%d\&quot;];\n&quot;,
+<b class="nc">&nbsp;                            escapeDotString(fromNode),</b>
+<b class="nc">&nbsp;                            escapeDotString(toNode), weight);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            out.println(&quot;}&quot;);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            e.printStackTrace();</b>
+&nbsp;            return;
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // 使用Graphviz命令行工具生成图形
+&nbsp;        try {
+&nbsp;            // 构建dot命令
+<b class="nc">&nbsp;            String command = graphvizPath</b>
+&nbsp;                    + &quot; -Tpng &quot; + dotFilePath + &quot; -o &quot; + pngFilePath;
+<b class="nc">&nbsp;            Process process = Runtime.getRuntime().exec(command);</b>
+<b class="nc">&nbsp;            process.waitFor();</b>
+<b class="nc">&nbsp;            System.out.println(&quot;Graph visualization generated as &#39;&quot;</b>
+&nbsp;                    + pngFilePath + &quot;&#39;&quot;);
+<b class="nc">&nbsp;        } catch (IOException | InterruptedException e) {</b>
+<b class="nc">&nbsp;            e.printStackTrace();</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 转义DOT语言特殊字符
+&nbsp;    private static String escapeDotString(final String input) {
+<b class="nc">&nbsp;        return input.replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // 查询桥接词
+&nbsp;    public static String queryBridgeWords(
+&nbsp;            final Map&lt;String, Set&lt;String&gt;&gt; graph ,final String word1, final String word2) {
+<b class="fc">&nbsp;        if (!graph.containsKey(word1) || !graph.containsKey(word2)) {</b>
+<b class="fc">&nbsp;            return &quot;No &quot; + word1 + &quot; or &quot; + word2 + &quot; in the graph!&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Set&lt;String&gt; bridgeWords = new HashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        Set&lt;String&gt; successorsWord1 = graph.get(word1);</b>
+<b class="fc">&nbsp;        Set&lt;String&gt; predecessorsWord2</b>
+<b class="fc">&nbsp;                = new HashSet&lt;&gt;(graph.size()); // 记录word2的前驱节点</b>
+&nbsp;
+&nbsp;        // 寻找word2的前驱节点
+<b class="fc">&nbsp;        for (String key : graph.keySet()) {</b>
+<b class="fc">&nbsp;            Set&lt;String&gt; successors = graph.get(key);</b>
+<b class="fc">&nbsp;            if (successors.contains(word2)) {</b>
+<b class="fc">&nbsp;                predecessorsWord2.add(key);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // 遍历word1的所有后继节点，检查是否也是word2的前驱节点
+<b class="fc">&nbsp;        for (String successor : successorsWord1) {</b>
+<b class="fc">&nbsp;            if (predecessorsWord2.contains(successor)) {</b>
+<b class="fc">&nbsp;                bridgeWords.add(successor);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        if (bridgeWords.isEmpty()) {</b>
+<b class="fc">&nbsp;            return &quot;No bridge words from &quot; + word1 + &quot; to &quot; + word2 + &quot;!&quot;;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return &quot;The bridge words from &quot; + word1 + &quot; to &quot; + word2 + &quot; are: &quot;</b>
+<b class="fc">&nbsp;                    + String.join(&quot;, &quot;, bridgeWords);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    //    // 根据bridge word生成新文本
+&nbsp;    public static String generateNewText(String inputText) {
+&nbsp;        // 使用空格分割输入文本，得到单词数组
+<b class="nc">&nbsp;        String[] words = inputText.toLowerCase().split(&quot;\\s+&quot;);</b>
+&nbsp;
+&nbsp;        // 结果列表，用于存储新文本的单词
+<b class="nc">&nbsp;        List&lt;String&gt; newWords = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;        // 用于随机选择桥接词
+<b class="nc">&nbsp;        Random random = new Random();</b>
+&nbsp;
+&nbsp;        // 遍历单词数组，查找每对相邻单词的桥接词
+<b class="nc">&nbsp;        for (int i = 0; i &lt; words.length - 1; i++) {</b>
+&nbsp;            // 添加当前单词
+<b class="nc">&nbsp;            newWords.add(words[i]);</b>
+&nbsp;
+&nbsp;            // 查询这对相邻单词的桥接词
+<b class="nc">&nbsp;            String bridgeWordsResult = queryBridgeWords(graph, words[i], words[i + 1]);</b>
+&nbsp;            // 如果桥接词结果以&quot;No bridge words&quot;开头，则表示没有桥接词
+<b class="nc">&nbsp;            if (bridgeWordsResult.startsWith(&quot;No&quot;)) {</b>
+&nbsp;                // 不插入任何单词，继续
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // 如果有桥接词，将其添加到结果列表
+&nbsp;            // 桥接词以逗号分隔，我们需要分割并随机选择一个
+<b class="nc">&nbsp;            String[] bridgeWordArray = bridgeWordsResult.substring(</b>
+<b class="nc">&nbsp;                    bridgeWordsResult.indexOf(&#39;:&#39;) + 2).trim().split(&quot;, &quot;);</b>
+&nbsp;            // 随机选择一个桥接词
+<b class="nc">&nbsp;            String bridgeWord =</b>
+<b class="nc">&nbsp;                    bridgeWordArray[random.nextInt(bridgeWordArray.length)];</b>
+<b class="nc">&nbsp;            newWords.add(bridgeWord);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 添加最后一个单词
+<b class="nc">&nbsp;        newWords.add(words[words.length - 1]);</b>
+&nbsp;
+&nbsp;        // 将结果列表转换为字符串，使用空格连接单词
+<b class="nc">&nbsp;        return String.join(&quot; &quot;, newWords);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    // 计算两个单词之间的最短路径
+&nbsp;    public static String calcShortestPath(
+&nbsp;            final Map&lt;String, Set&lt;String&gt;&gt; graph ,final String word1, final String word2) {
+<b class="nc">&nbsp;        if (!graph.containsKey(word1) || !graph.containsKey(word2)) {</b>
+<b class="nc">&nbsp;            return &quot;No &quot; + word1 + &quot; or &quot; + word2 + &quot; in the graph!&quot;;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 转换成邻接矩阵，这里假设边的权重为1
+&nbsp;
+<b class="nc">&nbsp;        for (int i = 0; i &lt; V; i++) {</b>
+<b class="nc">&nbsp;            for (int j = 0; j &lt; V; j++) {</b>
+<b class="nc">&nbsp;                dist[i][j] = (i == j) ? 0 : Integer.MAX_VALUE;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        // 填充邻接矩阵
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, Set&lt;String&gt;&gt; entry : graph.entrySet()) {</b>
+<b class="nc">&nbsp;            String word = entry.getKey();</b>
+<b class="nc">&nbsp;            Set&lt;String&gt; neighbors = entry.getValue();</b>
+<b class="nc">&nbsp;            for (String neighbor : neighbors) {</b>
+<b class="nc">&nbsp;                int index1 = getIndex(graph,word);</b>
+<b class="nc">&nbsp;                int index2 = getIndex(graph,neighbor);</b>
+<b class="nc">&nbsp;                if (index1 != -1 &amp;&amp; index2 != -1) {</b>
+<b class="nc">&nbsp;                    dist[index1][index2] = 1;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // 弗洛伊德算法填充所有顶点对的最短路径
+<b class="nc">&nbsp;        for (int k = 0; k &lt; V; k++) {</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; V; i++) {</b>
+<b class="nc">&nbsp;                for (int j = 0; j &lt; V; j++) {</b>
+<b class="nc">&nbsp;                    if (dist[i][k] != Integer.MAX_VALUE</b>
+&nbsp;                            &amp;&amp; dist[k][j] != Integer.MAX_VALUE
+&nbsp;                            &amp;&amp; dist[i][k] + dist[k][j] &lt; dist[i][j]) {
+<b class="nc">&nbsp;                        dist[i][j] = dist[i][k] + dist[k][j];</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        // 找到word1和word2对应的索引
+<b class="nc">&nbsp;        int index1 = getIndex(graph,word1);</b>
+<b class="nc">&nbsp;        int index2 = getIndex(graph,word2);</b>
+&nbsp;
+&nbsp;        // 如果最短距离是无穷大，说明word1和word2不相连
+<b class="nc">&nbsp;        if (dist[index1][index2] == Integer.MAX_VALUE) {</b>
+<b class="nc">&nbsp;            return &quot;No path between &quot; + word1 + &quot; and &quot; + word2 + &quot;.&quot;;</b>
+&nbsp;        }
+&nbsp;        // 提取最短路径
+<b class="nc">&nbsp;        List&lt;String&gt; shortestPath = extractShortestPath(graph,word1, word2);</b>
+&nbsp;
+&nbsp;        // 检查是否有路径
+<b class="nc">&nbsp;        if (shortestPath.size() &lt; 2) {</b>
+<b class="nc">&nbsp;            return &quot;No path between &quot; + word1 + &quot; and &quot; + word2 + &quot;.&quot;;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 使用StringBuilder构建带箭头的路径字符串
+<b class="nc">&nbsp;        StringBuilder pathWithArrows = new StringBuilder(</b>
+<b class="nc">&nbsp;                &quot;The shortest path from &quot;).append(word1).append(&quot; to &quot;)</b>
+<b class="nc">&nbsp;                .append(word2).append(&quot; is: &quot;);</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; shortestPath.size(); i++) {</b>
+<b class="nc">&nbsp;            pathWithArrows.append(shortestPath.get(i));</b>
+<b class="nc">&nbsp;            if (i &lt; shortestPath.size() - 1) {</b>
+<b class="nc">&nbsp;                pathWithArrows.append(&quot; → &quot;);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        System.out.println(pathWithArrows.toString()); // 打印带箭头的路径</b>
+&nbsp;        // 返回word1和word2之间的最短路径长度
+<b class="nc">&nbsp;        return &quot;The shortest path distance from &quot;</b>
+&nbsp;                + word1 + &quot; to &quot; + word2 + &quot; is: &quot;
+&nbsp;                + dist[index1][index2];
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public static void showDirectedGraphWithShortestPath(
+&nbsp;            final String word1, final String word2) {
+&nbsp;        // 首先，计算最短路径
+<b class="nc">&nbsp;        String shortestPathResult = calcShortestPath(graph,word1, word2);</b>
+<b class="nc">&nbsp;        if (!shortestPathResult.startsWith(&quot;The shortest path distance&quot;)) {</b>
+<b class="nc">&nbsp;            System.out.println(shortestPathResult);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // 然后，创建DOT文件并添加常规的图结构
+<b class="nc">&nbsp;        String dotFilePath = &quot;graph.dot&quot;;</b>
+<b class="nc">&nbsp;        String graphvizPath = &quot;D:\\Graphviz-11.0.0-win64\\Graphviz\\bin\\dot.exe&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        String pngFilePath = &quot;C:\\Users\\lc\\Desktop\\Lab1-main\\Lab1-main\\Lab1-main&quot;</b>
+&nbsp;                +
+&nbsp;                &quot;\\graph_with_shortest_path.png&quot;;
+&nbsp;
+<b class="nc">&nbsp;        try (PrintWriter out = new PrintWriter(new FileWriter(dotFilePath))) {</b>
+<b class="nc">&nbsp;            out.println(&quot;digraph G {&quot;);</b>
+<b class="nc">&nbsp;            out.println(&quot;  rankdir=LR;&quot;);</b>
+<b class="nc">&nbsp;            out.println(&quot;  node[shape=circle];&quot;);</b>
+&nbsp;
+&nbsp;            // 添加节点
+<b class="nc">&nbsp;            for (String node : graph.keySet()) {</b>
+<b class="nc">&nbsp;                out.printf(</b>
+&nbsp;                        &quot;  \&quot;%s\&quot; [style=filled, fillcolor=lightgray];\n&quot;,
+<b class="nc">&nbsp;                        escapeDotString(node));</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // 添加边
+&nbsp;            for (
+&nbsp;                    Map.Entry&lt;String,
+<b class="nc">&nbsp;                            Set&lt;String&gt;&gt; entry : graph.entrySet()) {</b>
+<b class="nc">&nbsp;                String fromNode = entry.getKey();</b>
+<b class="nc">&nbsp;                for (String toNode : entry.getValue()) {</b>
+<b class="nc">&nbsp;                    int weight = edgeWeights.getOrDefault(</b>
+&nbsp;                            fromNode,
+<b class="nc">&nbsp;                            new HashMap&lt;&gt;()).getOrDefault(toNode, 0);</b>
+<b class="nc">&nbsp;                    out.printf(</b>
+&nbsp;                            &quot;  \&quot;%s\&quot; -&gt; \&quot;%s\&quot; [label=\&quot;%d\&quot;];\n&quot;,
+<b class="nc">&nbsp;                            escapeDotString(fromNode),</b>
+<b class="nc">&nbsp;                            escapeDotString(toNode),</b>
+<b class="nc">&nbsp;                            weight);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // 根据最短路径算法结果，高亮显示最短路径上的边和节点
+&nbsp;            // 此处需要根据calcShortestPath方法的具体实现来确定最短路径上的节点和边
+&nbsp;            // 假设 shortestPath 是一个包含最短路径上节点的列表
+<b class="nc">&nbsp;            List&lt;String&gt; shortestPath =</b>
+<b class="nc">&nbsp;                    extractShortestPath(graph,word1, word2); // 需要实现这个方法</b>
+&nbsp;
+<b class="nc">&nbsp;            for (String node : shortestPath) {</b>
+<b class="nc">&nbsp;                out.printf(</b>
+&nbsp;                        &quot;  \&quot;%s\&quot; [style=filled, fillcolor=red];\n&quot;,
+<b class="nc">&nbsp;                        escapeDotString(node));</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            for (int i = 0; i &lt; shortestPath.size() - 1; i++) {</b>
+<b class="nc">&nbsp;                String fromNode = shortestPath.get(i);</b>
+<b class="nc">&nbsp;                String toNode = shortestPath.get(i + 1);</b>
+<b class="nc">&nbsp;                out.printf(&quot;  \&quot;%s\&quot; -&gt; \&quot;%s\&quot; [color=red, style=bold];\n&quot;,</b>
+<b class="nc">&nbsp;                        escapeDotString(fromNode), escapeDotString(toNode));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            out.println(&quot;}&quot;);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            e.printStackTrace();</b>
+&nbsp;            return;
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // 使用Graphviz命令行工具生成图形
+&nbsp;        try {
+<b class="nc">&nbsp;            String command = graphvizPath</b>
+&nbsp;                    + &quot; -Tpng &quot; + dotFilePath + &quot; -o &quot; + pngFilePath;
+<b class="nc">&nbsp;            Process process = Runtime.getRuntime().exec(command);</b>
+<b class="nc">&nbsp;            process.waitFor();</b>
+<b class="nc">&nbsp;            System.out.println(</b>
+&nbsp;                    &quot;Graph with highlighted shortest path generated as &#39;&quot;
+&nbsp;                            + pngFilePath + &quot;&#39;&quot;);
+<b class="nc">&nbsp;        } catch (IOException | InterruptedException e) {</b>
+<b class="nc">&nbsp;            e.printStackTrace();</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static List&lt;String&gt; extractShortestPath(
+&nbsp;            final Map&lt;String, Set&lt;String&gt;&gt; graph ,final String word1, final String word2) {
+<b class="nc">&nbsp;        List&lt;String&gt; path = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        Map&lt;String, Integer&gt; indexMap = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;        // 首先构建一个从索引到单词的映射
+<b class="nc">&nbsp;        for (int i = 0; i &lt; V; i++) {</b>
+<b class="nc">&nbsp;            String word = (String) graph.keySet().toArray()[i];</b>
+<b class="nc">&nbsp;            indexMap.put(word, i);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        int index1 = indexMap.get(word1);</b>
+<b class="nc">&nbsp;        int index2 = indexMap.get(word2);</b>
+&nbsp;
+&nbsp;        // 从word1开始，正向追踪最短路径
+<b class="nc">&nbsp;        int at = index1;</b>
+<b class="nc">&nbsp;        path.add(word1); // 添加起始节点</b>
+&nbsp;
+<b class="nc">&nbsp;        while (at != index2) {</b>
+<b class="nc">&nbsp;            for (int to = 0; to &lt; V; to++) {</b>
+<b class="nc">&nbsp;                if (dist[at][to] == 1</b>
+&nbsp;                        &amp;&amp; dist[to][index2] != Integer.MAX_VALUE) {
+<b class="nc">&nbsp;                    at = to;</b>
+<b class="nc">&nbsp;                    path.add((String) graph.keySet().toArray()[at]);</b>
+<b class="nc">&nbsp;                    break;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return path;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // 辅助函数，用于获取单词在邻接矩阵中的索引
+&nbsp;    static int getIndex(final Map&lt;String, Set&lt;String&gt;&gt; graph ,final String word) {
+<b class="nc">&nbsp;        int index = 0;</b>
+<b class="nc">&nbsp;        for (String w : graph.keySet()) {</b>
+<b class="nc">&nbsp;            if (w.equals(word)) {</b>
+<b class="nc">&nbsp;                return index;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            index++;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return -1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 随机游走
+&nbsp;    public static void randomWalk() {
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            Set&lt;String&gt; visitedEdges = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;            List&lt;String&gt; walkPath = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (graph.isEmpty()) {</b>
+<b class="nc">&nbsp;                System.out.println(&quot;The graph is empty!&quot;);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // 获取所有节点
+<b class="nc">&nbsp;            Collection&lt;String&gt; allNodes = graph.keySet();</b>
+&nbsp;
+&nbsp;            // 随机选择一个起始节点
+<b class="nc">&nbsp;            String startNode = allNodes.stream()</b>
+<b class="nc">&nbsp;                    .skip(random.nextInt(allNodes.size()))</b>
+<b class="nc">&nbsp;                    .findFirst()</b>
+<b class="nc">&nbsp;                    .orElseThrow();</b>
+&nbsp;
+<b class="nc">&nbsp;            walkPath.add(startNode);</b>
+&nbsp;
+<b class="nc">&nbsp;            String currentNode = startNode;</b>
+<b class="nc">&nbsp;            while (currentNode != null &amp;&amp; !stopRandomWalk) {</b>
+&nbsp;                // 获取当前节点的所有邻居节点
+<b class="nc">&nbsp;                Set&lt;String&gt; neighbors = graph.get(currentNode);</b>
+&nbsp;                // 随机选择一个邻居节点作为下一步
+&nbsp;                String nextNode
+<b class="nc">&nbsp;                        = neighbors.isEmpty() ? null : neighbors</b>
+<b class="nc">&nbsp;                        .toArray(new String[0])</b>
+<b class="nc">&nbsp;                        [random.nextInt(neighbors.size())];</b>
+&nbsp;
+&nbsp;                // 检查是否已经访问过从当前节点到该邻居的边
+<b class="nc">&nbsp;                String edgeKey = currentNode + &quot;-&quot; + nextNode; // 简化的边表示方法</b>
+<b class="nc">&nbsp;                if (visitedEdges.contains(edgeKey)) {</b>
+<b class="nc">&nbsp;                    break; // 如果遇到重复边，则停止游走</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                if (nextNode != null) {</b>
+<b class="nc">&nbsp;                    walkPath.add(nextNode);</b>
+<b class="nc">&nbsp;                    visitedEdges.add(edgeKey);</b>
+<b class="nc">&nbsp;                    currentNode = nextNode;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // 如果用户请求停止，则立即退出
+<b class="nc">&nbsp;            if (stopRandomWalk) {</b>
+<b class="nc">&nbsp;                System.out.println(&quot;Random walk stopped by user.&quot;);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // 将游走路径转换为字符串
+<b class="nc">&nbsp;            System.out.println(String.join(&quot; -&gt; &quot;, walkPath));</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            System.out.println(&quot;No edge exist ,please enter &#39;s&#39;&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-06-14 11:16</div>
+</div>
+</body>
+</html>
